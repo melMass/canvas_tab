@@ -34,7 +34,6 @@ function checkAndClear(key) {
 }
 
 const initEditorNode = (node) => {
-  console.error('editor node setup')
   node.collected_images = []
   node.addWidget(
     'button',
@@ -45,7 +44,6 @@ const initEditorNode = (node) => {
   node.widgets.reverse() // because auto created widget get put in first
 
   node.canvasWidget = node.widgets[1]
-  console.debug({ widget: node.canvasWidget })
   node.maskWidget = node.widgets[2]
 
   node.maskWidget.onTopOf = node.canvasWidget
@@ -78,7 +76,7 @@ function addDragDropSupport(node) {
   }
 }
 function transmitImages(images) {
-  console.log('transmit', editor)
+  console.debug('transmit', editor)
   if (!editor.window || editor.window.closed) openEditor()
 
   if (editor.channel) {
@@ -111,12 +109,12 @@ function openEditor() {
     setTimeout((_) => {
       if (checkAndClear('findImageEditor')) {
         //if the flag is still set by here, assume there's no-one out there
-        console.log('open window a')
+        console.debug('open window a')
         editor.window = window.open(editor_path, plugin_name)
       }
     }, 1000)
   } else {
-    console.log('open window b')
+    console.debug('open window b')
     editor.window = window.open(editor_path, plugin_name)
   }
 }
@@ -218,7 +216,6 @@ function addCanvasWidget(node, name, inputData, app) {
           widget.sendBlobRequired = false
         }
       }
-      console.log(widget)
       return widget.uploadedBlobName
     },
   }
@@ -240,7 +237,6 @@ function initiateCommunication() {
 function loadBlobIntoWidget(widget, blob) {
   const objectURL = URL.createObjectURL(blob)
   const img = new Image()
-  console.log({ widget, blob })
   img.onload = () => {
     widget.blob = blob
     widget.image = img
@@ -256,7 +252,7 @@ function handleWindowMessage(e) {
     if (data == 'Editor Here') {
       editor.window = e.source
       initiateCommunication()
-    } else console.log('window message received', e)
+    } else console.debug('window message received', e)
   }
 }
 
@@ -265,7 +261,6 @@ function messageFromEditor(event) {
   //send same thing to all of the Canvas_Tab nodes
   if (event.data.image instanceof Blob) {
     for (const node of nodes) {
-      console.log({ node })
       loadBlobIntoWidget(node.canvasWidget, event.data.image)
     }
   }
@@ -274,7 +269,7 @@ function messageFromEditor(event) {
       loadBlobIntoWidget(node.maskWidget, event.data.mask)
     }
   } else {
-    console.log('Message received from Image Editor:', event.data)
+    console.debug('Message received from Image Editor:', event.data)
   }
 }
 
@@ -288,7 +283,7 @@ function checkForExistingEditor() {
 app.registerExtension({
   name: 'canvas_tab',
   async init() {
-    console.log('init:' + this.name)
+    console.debug('init:' + this.name)
     checkForExistingEditor()
     const blankImage = document.createElement('canvas')
     blankImage.width = 64
